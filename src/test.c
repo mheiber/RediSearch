@@ -7,6 +7,7 @@
 #include <time.h>
 #include "tokenize.h"
 #include "spec.h"
+#include "levenshtein.h"
 
 #define TESTFUNC(f) \
                 printf("Testing %s ...\t", __STRING(f)); \
@@ -222,7 +223,7 @@ int testReadIterator() {
     IndexReader *r1 = NewIndexReaderBuf(w->bw.buf, NULL, NULL, 0, NULL);
     IndexHit h = NewIndexHit();
             
-    IndexIterator *it = NewIndexIterator(r1);
+    IndexIterator *it = NewReadIterator(r1);
     int i = 1;
     while(it->HasNext(it->ctx)) {
         if (it->Read(it->ctx, &h) == INDEXREAD_EOF) {
@@ -244,7 +245,7 @@ int testUnion() {
     si = NewSkipIndex(w2->skipIndexWriter.buf);
     IndexReader *r2 = NewIndexReader(w2->bw.buf->data , IW_Len(w2), si, NULL, 1);
     printf("Reading!\n");
-    IndexIterator *irs[] = {NewIndexIterator(r1), NewIndexIterator(r2)};
+    IndexIterator *irs[] = {NewReadIterator(r1), NewReadIterator(r2)};
     IndexIterator *ui =  NewUnionIterator(irs, 2, NULL);
     IndexHit h = NewIndexHit();
     int expected[] = {2, 3, 4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 24, 27, 30};
@@ -283,7 +284,7 @@ int testIntersection() {
     IterationContext ctx = {0,0};
     
     
-    IndexIterator *irs[] = {NewIndexIterator(r1), NewIndexIterator(r2)};//,NewIndexTerator(r2)};
+    IndexIterator *irs[] = {NewReadIterator(r1), NewReadIterator(r2)};//,NewIndexTerator(r2)};
     
     printf ("Intersecting...\n");
     
@@ -448,6 +449,20 @@ int testQueryTokenize() {
     return 0;
 }
 
+int testFuzzy() {
+    
+    TrieNode root;
+    TrieNode_Init(&root, 0);
+    
+    TrieNode_Add(&root, "hello", strlen("hello"));
+    TrieNode_Add(&root, "jello", strlen("hello"));
+    TrieNode_Add(&root, "hello world", strlen("hello world"));
+    
+    TrieNode_FuzzyMatches(&root, "yello", strlen("yello"), 2);
+    
+    return 0;
+}
+
 typedef union {
   int i;
   float f;
@@ -472,6 +487,7 @@ int main(int argc, char **argv) {
     //   TESTFUNC(testTokenize);
     //   TESTFUNC(testForwardIndex);
     //   TESTFUNC(testIndexSpec);
-    TESTFUNC(testQueryTokenize);
+    //TESTFUNC(testQueryTokenize);
+    TESTFUNC(testFuzzy)
   return 0;
 }

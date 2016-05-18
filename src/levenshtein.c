@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/param.h>
 #include <string.h>
+#include "levenshtein.h"
 
 typedef struct  {
 	int idx, val;
@@ -13,6 +14,7 @@ typedef struct {
     size_t len;
     size_t cap;
 } sparseVector; 
+
 
 sparseVector newSparseVectorCap(size_t cap) {
     sparseVector v = {
@@ -151,12 +153,7 @@ int SparseAutomaton_CanMatch(SparseAutomaton *a, sparseVector v) {
 // }
 
 
-typedef struct trieNode {
-	char b;
-	struct trieNode *children;
-    size_t numChildren;
-	char terminal;
-} TrieNode;
+
 
 void TrieNode_Init(TrieNode *n, char c) {
     
@@ -231,11 +228,12 @@ typedef struct {
 } stack;
 
 stackNode *stack_pop(stack *s) {
+	//printf("stack size: %d\n", s->len);
     if (s->len == 0) {
         return NULL;
     }
-    
-    return s->nodes[s->len--];
+    s->len--;
+    return s->nodes[s->len];
 }
 
 void stack_push(stack *s, stackNode *node) {
@@ -243,7 +241,9 @@ void stack_push(stack *s, stackNode *node) {
         s->cap = s->cap ? s->cap*2 : 2;
         s->nodes = realloc(s->nodes, s->cap * sizeof(stackNode*));
     }
-    s->nodes[s->len++] = node;
+    s->nodes[s->len] = node;
+	s->len++;
+	
 }
 
 stackNode *newStackNode(sparseVector v, char *str, size_t len, TrieNode *tn) {
@@ -269,15 +269,16 @@ void TrieNode_Traverse(TrieNode *n, SparseAutomaton *a, sparseVector vec, char *
 	stackNode *top = NULL;
 	sparseVector newVec = vec;
 	while (st.len > 0) {
-
+		
 		top = stack_pop(&st);
+		
 		n = top->node;
 		if (n->b != 0) {
 			newVec = SparseAutomaton_Step(a, top->vec, n->b);
 		}
 		// if this is a terminal node - just check if we have a match and add it to the results
 		if (n->terminal && newVec.len > 0 && SparseAutomaton_IsMatch(a, newVec)) {
-            printf("Found: %s\n", top->str);
+            printf("Found: %s%c\n", top->str,n->b);
 			//ret = append(ret, top.str+string(n.b))
 		}
 
@@ -292,7 +293,7 @@ void TrieNode_Traverse(TrieNode *n, SparseAutomaton *a, sparseVector vec, char *
 			}
                
             for (int i = 0; i < n->numChildren; i++) {
-                stack_push(&st, newStackNode(newVec, strdup(top->str), l + 1,&n->children[i]));
+                stack_push(&st, newStackNode(newVec, strdup(top->str), l + 2,&n->children[i]));
 			}
 		}
         
@@ -342,3 +343,5 @@ void TrieNode_FuzzyMatches(TrieNode *root, char *s, size_t len, int maxDist) {
 	//	}
 	//	return ret
 }
+
+
