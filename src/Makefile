@@ -12,7 +12,7 @@ else
 	SHOBJ_LDFLAGS ?= -bundle -undefined dynamic_lookup
 endif
 CFLAGS= -fPIC -lc -lm -std=gnu99 -I./ 
-RELEASEFLAGS=-O3
+RELEASEFLAGS=-O3 -g
 DEBUGFLAGS=-O0 -g 
 VARINT=varint.o buffer.o
 INDEX=index.o forward_index.o score_index.o skip_index.o numeric_index.o
@@ -65,7 +65,7 @@ debug: util rmutil snowball | module.so
 	
 
 clean:
-	find . -type f -name '*.o' -delete -print
+	find . -maxdepth 2 -type f -name '*.o' -delete -print
 
 test: $(VARINT) $(INDEX) $(TESTS) $(TEXT) $(UTILOBJS) $(REDIS) $(RMUTILOBJS)
 	$(CC) $(CFLAGS)  -o testung  $(INDEX) $(TEXT) $(VARINT) $(TESTS) $(REDIS) $(UTILOBJS) $(RMUTILOBJS) $(LIBS) -lc -lm 
