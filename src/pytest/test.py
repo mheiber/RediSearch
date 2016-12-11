@@ -40,6 +40,14 @@ class SearchTestCase(ModuleTestCase('../module.so')):
             self.assertEqual(res[3], "doc1")
             self.assertTrue('hello world' in res[4])
 
+            # test searching non existing words
+            res = r.execute_command('ft.search', 'idx', 'asdalfs lkjs dflks jdflkj sdlkfj slkd')  
+            self.assertTrue(len(res) == 1)
+            self.assertEqual(res[0], 0)
+            res = r.execute_command('ft.search', 'idx', '')
+            self.assertTrue(len(res) == 1)
+            self.assertEqual(res[0], 0)
+            
             # Test searching with no content
             res = r.execute_command('ft.search', 'idx', 'hello', 'nocontent')  
             self.assertTrue(len(res) == 3)

@@ -301,10 +301,10 @@ QueryResult *Query_Execute(Query *query) {
         it = Query_EvalStage(query, query->root);
     }
 
-    // no query evaluation plan?
+    
+    // no results found
     if (query->root == NULL || it == NULL) {
-        res->error = QUERY_ERROR_INTERNAL;
-        res->errorString = QUERY_ERROR_INTERNAL_STR;
+        
         return res;
     }
 
