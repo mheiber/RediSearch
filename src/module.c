@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "./dep/libnu/libnu.h"
+
 
 int AddDocument(RedisSearchCtx *ctx, Document doc, const char **errorString, int nosave) {
   int isnew;
@@ -663,6 +665,11 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   if ((RedisModule_StringToDouble(argv[3], &score) != REDISMODULE_OK)) {
     return RedisModule_ReplyWithError(ctx, "ERR invalid score");
   }
+
+  size_t valStrLen;
+  const char *rawValStr = RedisModule_StringPtrLen(val, &valStrLen);
+
+    // TODO: UNICODE
 
   int incr = RMUtil_ArgExists("INCR", argv, argc, 4);
 
