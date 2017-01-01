@@ -9,6 +9,7 @@
 #include "rmutil/util.h"
 #include "spec.h"
 #include "tokenize.h"
+#include "fold_str.h"
 #include "trie/trie_type.h"
 #include "util/logging.h"
 #include "varint.h"
@@ -620,6 +621,8 @@ int DropIndexCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   return RedisModule_ReplyWithSimpleString(ctx, "OK");
 }
 
+
+
 /*
 ## FT.SUGGADD key string score [INCR]
 
@@ -668,8 +671,24 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 
   size_t valStrLen;
   const char *rawValStr = RedisModule_StringPtrLen(val, &valStrLen);
+  const char *valFolded;
+  FoldStr(rawValStr, &valFolded);
 
-    // TODO: UNICODE
+//    uint32_t rawValStrUnicode[sizeof(rawValStr)];
+//    if(nu_readstr(rawValStr, rawValStrUnicode, nu_utf16be_read) != 0) {
+//        return RedisModule_ReplyWithError(ctx, "ERR converting to unicode");
+//    }
+//
+//    uint32_t codepoint;
+//    char *map;
+//    char newValStr[sizeof(rawValStr)];
+//    for (int i = 0; i < valStrLen; i++) {
+//        map = nu_toupper(rawValStrUnicode[i]);
+//        nu_casemap_read(map, codepoint);
+//        newValStr[i] = map;
+//    }
+//    return RedisModule_ReplyWithSimpleString("%s", rawValStr);
+
 
   int incr = RMUtil_ArgExists("INCR", argv, argc, 4);
 
@@ -683,7 +702,7 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   }
 
   /* Insert the new element. */
-  Trie_Insert(tree, val, score, incr);
+  Trie_Insert(tree, valFolded, score, incr);
 
   RedisModule_ReplyWithLongLong(ctx, tree->size);
   RedisModule_ReplicateVerbatim(ctx);
