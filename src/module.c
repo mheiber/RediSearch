@@ -671,7 +671,7 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 
   size_t valStrLen;
   const char *rawValStr = RedisModule_StringPtrLen(val, &valStrLen);
-  const char *valFolded;
+  char *valFolded;
   FoldStr(rawValStr, &valFolded);
 
 //    uint32_t rawValStrUnicode[sizeof(rawValStr)];
