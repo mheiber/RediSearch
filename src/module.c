@@ -669,26 +669,10 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     return RedisModule_ReplyWithError(ctx, "ERR invalid score");
   }
 
-  size_t valStrLen;
-  const char *rawValStr = RedisModule_StringPtrLen(val, &valStrLen);
-  char *valFolded;
-  FoldStr(rawValStr, &valFolded);
+  RedisModuleString *foldedVal;
+  size_t *foldedValLen;
 
-//    uint32_t rawValStrUnicode[sizeof(rawValStr)];
-//    if(nu_readstr(rawValStr, rawValStrUnicode, nu_utf16be_read) != 0) {
-//        return RedisModule_ReplyWithError(ctx, "ERR converting to unicode");
-//    }
-//
-//    uint32_t codepoint;
-//    char *map;
-//    char newValStr[sizeof(rawValStr)];
-//    for (int i = 0; i < valStrLen; i++) {
-//        map = nu_toupper(rawValStrUnicode[i]);
-//        nu_casemap_read(map, codepoint);
-//        newValStr[i] = map;
-//    }
-//    return RedisModule_ReplyWithSimpleString("%s", rawValStr);
-
+  FoldRedisModuleString(ctx, val, &foldedVal, foldedValLen);
 
   int incr = RMUtil_ArgExists("INCR", argv, argc, 4);
 
@@ -702,7 +686,7 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   }
 
   /* Insert the new element. */
-  Trie_Insert(tree, valFolded, score, incr);
+  Trie_Insert(tree, foldedVal, score, incr);
 
   RedisModule_ReplyWithLongLong(ctx, tree->size);
   RedisModule_ReplicateVerbatim(ctx);

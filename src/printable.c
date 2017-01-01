@@ -1,11 +1,16 @@
-#include "fold_str.h"
+#include "dep/libnu/libnu.h"
+// #include "fold_str.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
 
-void FoldStr(const char *str, char **foldedStr, size_t *newLen) {
+void FoldStr(char *str, char **foldedStr, uint32_t *newLen) {
 	char *foldedBuffer = malloc(sizeof(str));
 	char *folded = foldedBuffer;
 	const char *inputChar  = str;
 
-	size_t len = 0;
+	uint32_t len = 0;
 	while (*inputChar  != 0) {
 		uint32_t unicodeIn = 0;
 		inputChar  = nu_utf8_read(inputChar, &unicodeIn);
@@ -32,18 +37,9 @@ void FoldStr(const char *str, char **foldedStr, size_t *newLen) {
 	*foldedStr = foldedBuffer;
 }
 
-
-void FoldRedisModuleString(RedisModuleCtx *ctx, RedisModuleString *redisStr, RedisModuleString **foldedRedisStr, size_t *newLen) {
-	size_t *redisStrLen;
-	const char *str = RedisModule_StringPtrLen(redisStr, redisStrLen);
-
-	char *foldedStr;
-	size_t *foldedStrLen;
-	FoldStr(str, &foldedStr, foldedStrLen);
-
-	RedisModule_FreeString(ctx, redisStr);
-
-	const char *foldedStrPointer = foldedStr;
-
-	foldedRedisStr = RedisModule_CreateString(ctx, foldedStrPointer, *foldedStrLen);
+int main(void) {
+	char *output;
+	uint32_t *len;
+	FoldStr("straßßE", &output, len);
+	printf("%s %" PRIu32 "\n", output, *len);
 }

@@ -1,5 +1,5 @@
+#include <stdlib.h>
+#include "dep/libnu/libnu.h"
+#include "redismodule.h"
 
-/**
- * Fold string to unicode string
- */
-void FoldStr(char *str, char **foldedStr);
+void FoldRedisModuleString(RedisModuleCtx *ctx, RedisModuleString *redisStr, RedisModuleString **foldedRedisStr, size_t *newLen);

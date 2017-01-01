@@ -18,6 +18,7 @@ VARINT=varint.o buffer.o
 INDEX=index.o forward_index.o score_index.o skip_index.o numeric_index.o index_result.o expander.o
 TEXT=tokenize.o stemmer.o dep/snowball/libstemmer.o
 REDIS=redis_buffer.o module.o redis_index.o query.o spec.o
+FOLD_STR=fold_str.o
 QUERY_PARSE=query_parser/tokenizer.o query_parser/parser.o query_parser/parse.o
 UTILOBJS=util/heap.o util/logging.o util/fnv.o
 RMUTILOBJS=rmutil/librmutil.a
@@ -26,7 +27,7 @@ LIBNU=dep/libnu/libnu.a
 TESTS=test.o
 
 SRCDIR := $(shell pwd)
-MODULE=$(VARINT) $(TEXT) $(INDEX) $(REDIS) $(UTILOBJS) $(RMUTILOBJS) $(QUERY_PARSE) $(LIBTRIE)
+MODULE=$(VARINT) $(TEXT) $(INDEX) $(REDIS) $(UTILOBJS) $(RMUTILOBJS) $(FOLD_STR) $(QUERY_PARSE) $(LIBTRIE)
 
 CC=gcc
 .SUFFIXES: .c .so .xo .o
@@ -53,6 +54,9 @@ $(RMUTIL):
 $(TRIE):
 	$(MAKE) -C $@
 
+fold_str:
+	$(MAKE) -C $@
+
 query_parser:
 	$(MAKE) -C $@
 	
@@ -74,7 +78,7 @@ libnu:
 	$(CC) -I. $(CFLAGS) $(SHOBJ_CFLAGS) -fPIC -c $< -o $@
 
 module.so: $(MODULE)
-	$(LD) -o $@ $(VARINT) $(INDEX) $(TEXT) $(REDIS) $(UTILOBJS) $(RMUTILOBJS) $(LIBTRIE) $(QUERY_PARSE) $(SHOBJ_LDFLAGS) $(LIBS) $(LIBNU) -lc -lm
+	$(LD) -o $@ $(VARINT) $(INDEX) $(TEXT) $(REDIS) $(UTILOBJS) $(RMUTILOBJS) $(LIBTRIE) $(FOLD_STR) $(QUERY_PARSE) $(SHOBJ_LDFLAGS) $(LIBS) $(LIBNU) -lc -lm
 
 
 release: CFLAGS += $(RELEASEFLAGS)
