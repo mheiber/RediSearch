@@ -669,8 +669,9 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     return RedisModule_ReplyWithError(ctx, "ERR invalid score");
   }
 
-  RedisModuleString *foldedVal;
-  FoldRedisModuleString(ctx, val, &foldedVal, NULL);
+  char *foldedVal;
+  size_t foldedValLen;
+  FoldRedisModuleString(ctx, val, &foldedVal, &foldedValLen);
 
   int incr = RMUtil_ArgExists("INCR", argv, argc, 4);
 
@@ -684,7 +685,7 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   }
 
   /* Insert the new element. */
-  Trie_Insert(tree, foldedVal, score, incr);
+  Trie_InsertStringBuffer(tree, foldedVal, foldedValLen, score, incr);
 
   RedisModule_ReplyWithLongLong(ctx, tree->size);
   RedisModule_ReplicateVerbatim(ctx);
@@ -799,8 +800,10 @@ int SuggestGetCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   }
 
   // get the string to search for
+  RedisModuleString *rmStringSearch = argv[2];
   size_t len;
-  char *s = (char *)RedisModule_StringPtrLen(argv[2], &len);
+  char *foldedSearch;
+  FoldRedisModuleString(ctx, rmStringSearch, &foldedSearch, &len);
 
   // get optional FUZZY argument
   long maxDist = 0;
@@ -821,7 +824,7 @@ int SuggestGetCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 
   int optimize = RMUtil_ArgExists("OPTIMIZE", argv, argc, 3);
 
-  Vector *res = Trie_Search(tree, s, len, num, maxDist, 1, trim, optimize);
+  Vector *res = Trie_Search(tree, foldedSearch, len, num, maxDist, 1, trim, optimize);
 
   // if we also need to return scores, we need double the records
   RedisModule_ReplyWithArray(ctx, Vector_Size(res) * (withScores ? 2 : 1));

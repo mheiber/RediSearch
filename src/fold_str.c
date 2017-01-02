@@ -33,13 +33,10 @@ void FoldStr(const char *str, char **foldedStr, size_t *newLen) {
 }
 
 
-void FoldRedisModuleString(RedisModuleCtx *ctx, RedisModuleString *redisStr, RedisModuleString **foldedRedisStr, size_t *newLen) {
+void FoldRedisModuleString(RedisModuleCtx *ctx, RedisModuleString *redisStr, char **foldedStr, size_t *newLen) {
 	const char *str = RedisModule_StringPtrLen(redisStr, NULL);
 
-	char *foldedStr;
 	size_t foldedStrLen;
-	FoldStr(str, &foldedStr, &foldedStrLen);
+	FoldStr(str, foldedStr, &foldedStrLen);
 
-	const char *foldedStrPointer = foldedStr;
-	*foldedRedisStr = RedisModule_CreateString(ctx, foldedStrPointer, foldedStrLen);
 }
