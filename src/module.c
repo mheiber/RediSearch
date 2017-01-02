@@ -670,9 +670,7 @@ int SuggestAddCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   }
 
   RedisModuleString *foldedVal;
-  size_t *foldedValLen;
-
-  FoldRedisModuleString(ctx, val, &foldedVal, foldedValLen);
+  FoldRedisModuleString(ctx, val, &foldedVal, NULL);
 
   int incr = RMUtil_ArgExists("INCR", argv, argc, 4);
 
